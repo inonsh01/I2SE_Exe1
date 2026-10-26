@@ -9,7 +9,7 @@ both shapes with one algorithm (see docs/ALGORITHM.md §6).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -26,12 +26,40 @@ class PlaneError(ValueError):
     """The given points do not describe a valid plane."""
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, eq=False)
 class Plane:
+    """A valid plane. Immutable: once created, it cannot be changed.
+
+    Every way of creating a Plane - Plane.from_points(...) or calling
+    Plane(s1, s2, b, c) directly - runs the same validation, so any Plane
+    object that exists is valid. The points are copied into read-only arrays,
+    so changing the caller's arrays (or plane.b[0] = ...) cannot break it.
+    """
     s1: np.ndarray  # start of the left leg  (a, or a1)
     s2: np.ndarray  # start of the right leg (a, or a2)
     b: np.ndarray   # end of the left leg
     c: np.ndarray   # end of the right leg
+    eps: float = field(default=EPS, repr=False)
+
+    def __post_init__(self):
+        pts = _to_points([self.s1, self.s2, self.b, self.c])   # a new 4 x 3 float array
+        s1, s2, b, c = pts
+        if np.array_equal(s1, s2):
+            _check_triangle(s1, b, c, self.eps)
+        else:
+            _check_trapezoid(s1, s2, b, c, self.eps)
+        pts.setflags(write=False)                    # the rows below are views: read-only too
+        for name, value in zip(("s1", "s2", "b", "c"), pts):
+            object.__setattr__(self, name, value)    # frozen dataclass: the only allowed write
+
+    # value semantics: two planes are equal if they have the same points
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Plane):
+            return NotImplemented
+        return all(np.array_equal(getattr(self, n), getattr(other, n)) for n in ("s1", "s2", "b", "c"))
+
+    def __hash__(self) -> int:
+        return hash(tuple(getattr(self, n).tobytes() for n in ("s1", "s2", "b", "c")))
 
     @property
     def leg_length(self) -> float:
@@ -56,11 +84,9 @@ class Plane:
         pts = _to_points(points)
         if len(pts) == 3:
             a, b, c = pts
-            _check_triangle(a, b, c, eps)
-            return cls(s1=a, s2=a, b=b, c=c)
+            return cls(s1=a, s2=a, b=b, c=c, eps=eps)
         a1, a2, b, c = pts
-        _check_trapezoid(a1, a2, b, c, eps)
-        return cls(s1=a1, s2=a2, b=b, c=c)
+        return cls(s1=a1, s2=a2, b=b, c=c, eps=eps)
 
 
 # --------------------------------------------------------------------- helpers

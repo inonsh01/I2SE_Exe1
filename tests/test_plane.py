@@ -1,4 +1,7 @@
-"""Unit tests for plane validation: TC-P1 ... TC-P13 in docs/TESTING.md."""
+"""Unit tests for plane validation: TC-P1 ... TC-P14 in docs/TESTING.md."""
+import dataclasses
+
+import numpy as np
 import pytest
 
 from projection import Plane, PlaneError
@@ -106,3 +109,37 @@ def test_tc_p12_plane_too_large_rejected(pts):
 def test_tc_p13_coordinates_too_far_rejected():
     with pytest.raises(PlaneError, match="between"):
         Plane.from_points([[1e9, 0, 0], [1e9 - 3, 4, 0], [1e9 + 3, 4, 0]])
+
+
+# ----------------------------------------------------------------- TC-P14 (DESIGN.md §4.1)
+def test_tc_p14_plane_cannot_be_changed():
+    p = Plane.from_points(TRIANGLE)
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        p.b = np.zeros(3)
+    with pytest.raises(ValueError, match="read-only"):
+        p.b[0] = 100
+    assert p.leg_length == pytest.approx(5)
+
+
+def test_tc_p14_caller_arrays_are_copied():
+    pts = np.array(TRIANGLE, dtype=float)
+    p = Plane.from_points(pts)
+    pts[1, 0] = 100                       # change the caller's array afterwards
+    assert p.leg_length == pytest.approx(5)
+
+
+def test_tc_p14_constructor_validates_too():
+    z = np.zeros(3)
+    with pytest.raises(PlaneError):
+        Plane(z, z, z, z)
+    with pytest.raises(PlaneError, match="legs differ"):
+        Plane([0, 0, 0], [0, 0, 0], [0, 10, 0], [0, 0, 10.01])
+    assert Plane([3, 0, 0], [3, 0, 0], [0, 4, 0], [6, 4, 0]) == Plane.from_points(TRIANGLE)
+
+
+def test_tc_p14_equality_and_hash():
+    p, q = Plane.from_points(TRIANGLE), Plane.from_points(sum(TRIANGLE, []))
+    r = Plane.from_points(RECTANGLE)
+    assert p == q and hash(p) == hash(q)
+    assert p != r
+    assert len({p, q, r}) == 2
