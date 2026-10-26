@@ -1,4 +1,4 @@
-"""Unit tests for plane validation: TC-P1 ... TC-P9 in docs/TESTING.md."""
+"""Unit tests for plane validation: TC-P1 ... TC-P13 in docs/TESTING.md."""
 import pytest
 
 from projection import Plane, PlaneError
@@ -75,3 +75,34 @@ def test_tc_p8_not_coplanar_rejected():
 def test_tc_p9_wrong_input_rejected(pts):
     with pytest.raises(PlaneError):
         Plane.from_points(pts)
+
+
+# ----------------------------------------------------------------- TC-P10..P13
+def test_tc_p10_isosceles_trapezoid_accepted():
+    # top 4 wide, base 10 wide, symmetric around x = 5; legs both sqrt(9 + 64)
+    p = Plane.from_points([[3, 0, 0], [7, 0, 0], [0, 8, 0], [10, 8, 0]])
+    assert not p.is_triangle
+
+
+@pytest.mark.parametrize("pts, rule", [
+    ([[7, 0, 0], [3, 0, 0], [0, 8, 0], [10, 8, 0]], "legs cross"),        # a1 and a2 swapped
+    ([[0, 0, 0], [0, 0, 4], [10, 0, -2], [2, 0, 14]], "parallel"),         # equal legs, sides not parallel
+    ([[0, 0, 0], [4, 0, 0], [1, 5, 0], [5, 5, 0]], "not symmetric"),       # parallelogram
+])
+def test_tc_p11_not_an_isosceles_trapezoid_rejected(pts, rule):
+    with pytest.raises(PlaneError, match=rule):
+        Plane.from_points(pts)
+
+
+@pytest.mark.parametrize("pts", [
+    [[0, 0, 0], [1e5, 0, 0], [0, 1e5, 0]],                                  # legs too long
+    [[0, 0, 0], [0, 0, 5000], [3000, 0, 0], [3000, 0, 5000]],              # base too long
+])
+def test_tc_p12_plane_too_large_rejected(pts):
+    with pytest.raises(PlaneError, match="too large"):
+        Plane.from_points(pts)
+
+
+def test_tc_p13_coordinates_too_far_rejected():
+    with pytest.raises(PlaneError, match="between"):
+        Plane.from_points([[1e9, 0, 0], [1e9 - 3, 4, 0], [1e9 + 3, 4, 0]])

@@ -1,4 +1,4 @@
-"""Plane definition and validation (SRS FR-4, FR-5, FR-6).
+"""Plane definition and validation (SRS FR-4, FR-5, FR-6, FR-12).
 
 A plane is given either by 3 points (a, b, c) forming an isosceles triangle,
 or by 4 points (a1, a2, b, c) forming an isosceles trapezoid.
@@ -14,6 +14,12 @@ from dataclasses import dataclass
 import numpy as np
 
 EPS = 1e-3  # tolerance for comparing lengths (from the assignment)
+
+# A volume is smaller than 1024 voxels per axis, so its longest diagonal is
+# about 1774 voxels. A plane side longer than MAX_SIDE can only cover the
+# volume with a small part of it, but would need a huge image (and memory).
+MAX_SIDE = 4096
+MAX_COORD = 1e6   # |coordinate| limit, keeps voxel indices far from overflow
 
 
 class PlaneError(ValueError):
@@ -71,6 +77,8 @@ def _to_points(points) -> np.ndarray:
         raise PlaneError(f"expected 3 or 4 points with 3 coordinates each, got shape {pts.shape}")
     if not np.all(np.isfinite(pts)):
         raise PlaneError("points must be finite numbers")
+    if np.abs(pts).max() > MAX_COORD:
+        raise PlaneError(f"coordinates must be between -{MAX_COORD:g} and {MAX_COORD:g}")
     return pts
 
 
@@ -83,21 +91,30 @@ def _check_legs(d1: float, d2: float, eps: float) -> None:
         raise PlaneError("legs must be at least 1 voxel long")
     if abs(d1 - d2) >= eps:
         raise PlaneError(f"legs differ in length: {d1:.4f} vs {d2:.4f} (EPS = {eps})")
+    if d1 > MAX_SIDE:
+        raise PlaneError(f"plane too large: legs are {d1:.1f} voxels long (max {MAX_SIDE})")
+
+
+def _check_base(b, c, eps: float) -> float:
+    dbc = _dist(b, c)
+    if dbc < eps:
+        raise PlaneError("b and c must be different points")
+    if dbc > MAX_SIDE:
+        raise PlaneError(f"plane too large: base b-c is {dbc:.1f} voxels long (max {MAX_SIDE})")
+    return dbc
 
 
 def _check_triangle(a, b, c, eps: float) -> None:
     _check_legs(_dist(a, b), _dist(a, c), eps)
-    if _dist(b, c) < eps:
-        raise PlaneError("b and c must be different points")
+    _check_base(b, c, eps)
     if np.linalg.norm(np.cross(b - a, c - a)) < eps:
         raise PlaneError("a, b, c are collinear (on one line), so they do not define a plane")
 
 
 def _check_trapezoid(a1, a2, b, c, eps: float) -> None:
     _check_legs(_dist(a1, b), _dist(a2, c), eps)
-    if _dist(b, c) < eps:
-        raise PlaneError("b and c must be different points")
-    if _dist(a1, a2) > _dist(b, c) + eps:
+    dbc = _check_base(b, c, eps)
+    if _dist(a1, a2) > dbc + eps:
         raise PlaneError("dist(a1, a2) must be <= dist(b, c)")
     # all 4 points on one plane: a2 must lie on the plane through a1, b, c
     normal = np.cross(b - a1, c - a1)
@@ -106,3 +123,16 @@ def _check_trapezoid(a1, a2, b, c, eps: float) -> None:
         raise PlaneError("a1, b, c are collinear (on one line), so they do not define a plane")
     if abs(np.dot(a2 - a1, normal / n)) >= eps:
         raise PlaneError("the four points are not on the same plane")
+    # an isosceles trapezoid: the top a1-a2 is parallel to the base b-c and
+    # points the same way (otherwise the legs cross), and the shape is
+    # symmetric. Equal legs + parallel sides allow only one other shape, a
+    # parallelogram, and the symmetry check rejects it.
+    u = (c - b) / dbc                          # direction of the base
+    top = a2 - a1
+    if np.linalg.norm(np.cross(top, u)) >= eps:
+        raise PlaneError("a1-a2 must be parallel to b-c")
+    if np.dot(top, u) < 0:
+        raise PlaneError("the legs cross: a1 must be on the side of b, and a2 on the side of c")
+    axis = (b + c) / 2 - (a1 + a2) / 2         # joins the middles of the two sides
+    if abs(np.dot(axis, u)) >= eps:
+        raise PlaneError("not an isosceles trapezoid: the shape is not symmetric (a parallelogram?)")
