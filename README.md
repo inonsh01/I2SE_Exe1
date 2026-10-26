@@ -35,6 +35,34 @@ saves them as a video (MP4).
 - File formats other than NRRD (e.g. DICOM).
 - Physical/world coordinates: plane points are given in voxel indices.
 
+## How to run
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate   # once
+pip install -r requirements.txt                       # once
+python data/download_data.py MRHead                   # get a real scan
+
+python Ex0.py data/MRHead.nrrd examples/rotating.csv out.mp4   # the demo
+python -m pytest                                               # all tests
+python benchmarks/bench.py                                     # speed (500^3)
+```
+
+Example plane lists for MRHead are in `examples/` (`axial_sweep.csv`,
+`rotating.csv`, `triangles.csv`); `examples/make_planes.py` creates them.
+
+## Project layout
+
+```
+projection/   plane.py (plane validation) · projector.py (the algorithm) · io.py (files)
+Ex0.py        the demo
+tests/        automated tests (pytest), named after the test cases in docs/TESTING.md
+benchmarks/   speed test
+examples/     plane lists (CSV)
+data/         data set: download script + synthetic volumes
+docs/         SRS, algorithm, testing strategy
+results/      demo output videos
+```
+
 ## Documents
 - [Software Requirements Specification (SRS)](docs/SRS.md)
 - [Algorithm](docs/ALGORITHM.md)
