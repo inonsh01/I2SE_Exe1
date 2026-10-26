@@ -1,0 +1,104 @@
+"""Unit tests for file input/output: TC-IO1 ... TC-IO7 in docs/TESTING.md."""
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from projection.io import intensity_window, load_volume, read_planes, to_uint8, write_video
+
+DATA = Path(__file__).resolve().parents[1] / "data"
+
+
+# ----------------------------------------------------------------- TC-IO1
+@pytest.mark.parametrize("name, shape, dtype", [
+    ("synthetic_cube.nrrd", (64, 64, 64), np.uint8),
+    ("synthetic_gradient.nrrd", (64, 64, 64), np.uint16),
+    ("synthetic_sphere.nrrd", (64, 64, 64), np.uint32),
+    ("synthetic_odd_shape.nrrd", (10, 40, 25), np.uint8),
+])
+def test_tc_io1_load_synthetic(name, shape, dtype):
+    vol = load_volume(DATA / name)
+    assert vol.shape == shape and vol.dtype == dtype
+
+
+def test_tc_io1_axis_order():
+    vol = load_volume(DATA / "synthetic_odd_shape.nrrd")
+    assert (vol[0, 0, 0], vol[-1, 0, 0], vol[0, -1, 0], vol[0, 0, -1]) == (50, 100, 150, 250)
+
+
+# ----------------------------------------------------------------- TC-IO2
+def test_tc_io2_2d_nrrd_rejected(tmp_path):
+    import nrrd
+    nrrd.write(str(tmp_path / "flat.nrrd"), np.zeros((5, 5), np.uint8))
+    with pytest.raises(ValueError, match="3D"):
+        load_volume(tmp_path / "flat.nrrd")
+
+
+def test_missing_file(tmp_path):
+    with pytest.raises(FileNotFoundError, match="not found"):
+        load_volume(tmp_path / "nope.nrrd")
+    with pytest.raises(FileNotFoundError, match="not found"):
+        read_planes(tmp_path / "nope.csv")
+
+
+def test_not_an_nrrd_file(tmp_path):
+    (tmp_path / "bad.nrrd").write_text("hello")
+    with pytest.raises(ValueError, match="not a valid NRRD"):
+        load_volume(tmp_path / "bad.nrrd")
+
+
+# ----------------------------------------------------------------- TC-IO3..6
+def test_tc_io3_csv_formats(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("ax,ay,az,bx,by,bz,cx,cy,cz\n"
+                 "# a triangle\n"
+                 "3,0,0, 0,4,0, 6,4,0\n"
+                 "\n"
+                 "0,0,0, 0,0,9, 9,0,0, 9,0,9\n")
+    planes = read_planes(f)
+    assert len(planes) == 2
+    assert planes[0].is_triangle and not planes[1].is_triangle
+
+
+def test_tc_io4_non_number(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("3,0,0,0,4,0,6,4,0\n3,0,x,0,4,0,6,4,0\n")
+    with pytest.raises(ValueError, match="line 2"):
+        read_planes(f)
+
+
+def test_tc_io5_invalid_plane_names_line_and_rule(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("3,0,0,0,4,0,6,4,0\n3,0,0,0,4,0,6,4,0\n0,0,0,0,10,0,3,3,0\n")
+    with pytest.raises(ValueError, match=r"line 3: legs differ"):
+        read_planes(f)
+
+
+def test_tc_io6_empty_csv(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("# nothing here\n\n")
+    with pytest.raises(ValueError, match="no planes"):
+        read_planes(f)
+
+
+# ----------------------------------------------------------------- TC-IO7
+def test_tc_io7_video_frame_count_and_sizes(tmp_path):
+    import imageio.v2 as imageio
+    frames = [np.full((30, 40), 255, np.uint8), np.zeros((50, 20), np.uint8), np.full((10, 10), 128, np.uint8)]
+    out = tmp_path / "v.mp4"
+    write_video(frames, out)
+    reader = imageio.get_reader(str(out))
+    assert reader.count_frames() == 3
+    first = reader.get_data(0)
+    assert first.shape[0] % 16 == 0 and first.shape[1] % 16 == 0
+    assert first.shape[0] >= 50 and first.shape[1] >= 40
+
+
+# ----------------------------------------------------------------- brightness (FR-11)
+def test_to_uint8_and_window():
+    vol = np.arange(1000, dtype=np.int16).reshape(10, 10, 10) - 500   # -500 .. 499, signed
+    lo, hi = intensity_window(vol, 0, 100)
+    img = to_uint8(vol[:, :, 0], lo, hi)
+    assert img.dtype == np.uint8
+    assert img.min() == 0 and img.max() > 200
+    assert to_uint8(np.array([[lo - 100, hi + 100]]), lo, hi).tolist() == [[0, 255]]   # clipped
