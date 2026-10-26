@@ -51,6 +51,11 @@ run "B8  NRRD file does not exist"             data/missing.nrrd examples/rotati
 run "B9  CSV file does not exist"              $H examples/missing.csv           $OUT/B9.mp4
 run "B10 a file that is not NRRD"              README.md examples/rotating.csv   $OUT/B10.mp4
 run "B11 missing arguments"                    $H
+run "B12 plane far too large"                  $H examples/bad/too_large.csv       $OUT/B12.mp4
+run "B13 typo in the first line"               $H examples/bad/typo_first_line.csv $OUT/B13.mp4
+run "B14 legs cross (not a trapezoid)"         $H examples/bad/legs_cross.csv      $OUT/B14.mp4
+run "B15 output folder does not exist"         $H examples/rotating.csv            no_such_folder/out.mp4
+run "B16 bad --fps"                            $H examples/rotating.csv            $OUT/B16.mp4 --fps 0
 
 echo
 echo "######## videos that were created ########"

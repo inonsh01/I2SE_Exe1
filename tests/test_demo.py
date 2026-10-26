@@ -1,4 +1,4 @@
-"""End-to-end tests of the demo Ex0.py: TC-D1 ... TC-D7 in docs/TESTING.md."""
+"""End-to-end tests of the demo Ex0.py: TC-D1 ... TC-D7, TC-D9 ... TC-D11 in docs/TESTING.md."""
 import subprocess
 import sys
 from pathlib import Path
@@ -93,3 +93,29 @@ def test_tc_d7_wrong_arguments(tmp_path):
     r = run_demo(CUBE)
     assert r.returncode != 0
     assert "usage" in r.stderr.lower()
+
+
+# ----------------------------------------------------------------- TC-D9..D11
+def test_tc_d9_output_folder_missing(tmp_path, planes_csv):
+    r = run_demo(CUBE, planes_csv, tmp_path / "no_such_folder" / "out.mp4")
+    assert r.returncode != 0
+    assert "does not exist" in r.stderr
+    assert "Traceback" not in r.stderr
+
+
+def test_tc_d10_plane_too_large(tmp_path):
+    big = tmp_path / "big.csv"
+    big.write_text("0,0,0, 1e5,0,0, 0,1e5,0\n")
+    out = tmp_path / "out.mp4"
+    r = run_demo(CUBE, big, out)
+    assert r.returncode != 0
+    assert "line 1" in r.stderr and "too large" in r.stderr
+    assert "Traceback" not in r.stderr
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("fps", ["0", "-5", "abc"])
+def test_tc_d11_bad_fps(tmp_path, planes_csv, fps):
+    r = run_demo(CUBE, planes_csv, tmp_path / "out.mp4", "--fps", fps)
+    assert r.returncode != 0
+    assert "--fps" in r.stderr
