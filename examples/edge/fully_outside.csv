@@ -1,0 +1,2 @@
+# rectangle far away from the scan: valid, but every pixel is outside -> black frame
+1000,1000,0, 1000,1000,129, 1255,1000,0, 1255,1000,129

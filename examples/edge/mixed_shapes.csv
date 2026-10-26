@@ -1,0 +1,3 @@
+# a triangle (9 numbers) and a rectangle (12 numbers) in one file
+0,100,64.5, 255,100,0, 255,100,129
+0,50,0, 0,50,129, 255,50,0, 255,50,129

@@ -9,6 +9,7 @@ Usage:
 """
 import hashlib
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -43,12 +44,20 @@ def download(name: str) -> None:
     if dest.exists() and sha256(dest) == checksum:
         print(f"{name}: already downloaded")
         return
-    print(f"{name}: downloading ({description}) ...")
-    urllib.request.urlretrieve(BASE_URL + checksum, dest)
-    if sha256(dest) != checksum:
-        dest.unlink()
-        raise SystemExit(f"{name}: checksum mismatch, file deleted")
-    print(f"{name}: ok")
+    part = dest.with_suffix(".part")  # download next to it, rename only when complete
+    for attempt in range(1, 4):
+        print(f"{name}: downloading ({description}) ..." + (f" retry {attempt}" if attempt > 1 else ""))
+        try:
+            urllib.request.urlretrieve(BASE_URL + checksum, part)
+        except (urllib.error.URLError, OSError) as e:
+            print(f"{name}: download failed: {e}")
+            continue
+        if sha256(part) == checksum:
+            part.replace(dest)
+            print(f"{name}: ok")
+            return
+        print(f"{name}: checksum mismatch")
+    raise SystemExit(f"{name}: could not download a valid copy, try again later")
 
 
 def main() -> None:

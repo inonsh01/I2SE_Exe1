@@ -45,6 +45,7 @@ python data/download_data.py MRHead                   # get a real scan
 python Ex0.py data/MRHead.nrrd examples/rotating.csv out.mp4   # the demo
 python -m pytest                                               # all tests
 python benchmarks/bench.py                                     # speed (500^3)
+bash run_demo_cases.sh                                         # every good and bad demo run
 ```
 
 Example plane lists for MRHead are in `examples/` (`axial_sweep.csv`,
@@ -68,3 +69,5 @@ results/      demo output videos
 - [Algorithm](docs/ALGORITHM.md)
 - [Data set](data/README.md)
 - [Testing strategy](docs/TESTING.md)
+- [Experiment and results](docs/EXPERIMENT.md)
+- [Demo runs: good, edge and bad cases](docs/DEMO_RUNS.md)

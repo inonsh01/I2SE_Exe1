@@ -1,0 +1,2 @@
+# rectangle half inside the head scan, half outside (x from -128 to 127)
+-128,128,0, -128,128,129, 127,128,0, 127,128,129

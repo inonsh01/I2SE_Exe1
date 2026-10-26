@@ -224,3 +224,5 @@ __marimo__/
 data/*.nrrd
 !data/synthetic_*.nrrd
 .venv/
+data/*.part
+results/cases/
