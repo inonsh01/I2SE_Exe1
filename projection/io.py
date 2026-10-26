@@ -5,7 +5,7 @@ brightness scale for every frame).
 """
 from __future__ import annotations
 
-import csv
+import re
 from pathlib import Path
 
 import numpy as np
@@ -31,27 +31,45 @@ def load_volume(path: str | Path) -> np.ndarray:
 
 
 # --------------------------------------------------------------------- CSV
+_SEPARATORS = re.compile(r"[,;\s]+")   # comma, semicolon or whitespace
+
+
+def _to_number(cell: str) -> float | None:
+    try:
+        return float(cell)
+    except ValueError:
+        return None
+
+
 def read_planes(path: str | Path) -> list[Plane]:
     """Read planes from a CSV file: one plane per line, 9 or 12 numbers.
 
-    Blank lines, lines starting with '#', and a header line (first line with
-    words instead of numbers) are skipped. Any error names the line number.
+    Numbers may be separated by commas, semicolons or spaces. Blank lines and
+    lines starting with '#' are skipped. The first non-comment line is
+    skipped as a header only if it contains no numbers at all (for example
+    "ax,ay,az,..."). A line that mixes numbers and text is always an error,
+    so a typo in the first plane is never dropped silently. Any error names
+    the line number.
     """
     path = Path(path)
     if not path.is_file():
         raise FileNotFoundError(f"{path}: file not found")
     planes: list[Plane] = []
-    with open(path, newline="") as f:
-        for line_no, row in enumerate(csv.reader(f), start=1):
-            cells = [c.strip() for c in row if c.strip()]
-            if not cells or cells[0].startswith("#"):
+    header_allowed = True
+    with open(path, encoding="utf-8-sig") as f:   # utf-8-sig: ignore a BOM from Excel
+        for line_no, line in enumerate(f, start=1):
+            text = line.strip()
+            if not text or text.startswith("#"):
                 continue
-            try:
-                numbers = [float(c) for c in cells]
-            except ValueError:
-                if line_no == 1:
+            cells = [c for c in _SEPARATORS.split(text) if c]
+            numbers = [_to_number(c) for c in cells]
+            if None in numbers:
+                if header_allowed and all(n is None for n in numbers):
+                    header_allowed = False
                     continue  # header line
-                raise ValueError(f"{path}, line {line_no}: not a number in {cells}") from None
+                bad = [c for c, n in zip(cells, numbers) if n is None]
+                raise ValueError(f"{path}, line {line_no}: not a number: {', '.join(bad)}")
+            header_allowed = False
             try:
                 planes.append(Plane.from_points(numbers))
             except PlaneError as e:
@@ -59,6 +77,19 @@ def read_planes(path: str | Path) -> list[Plane]:
     if not planes:
         raise ValueError(f"{path}: no planes found")
     return planes
+
+
+def check_output_path(path: str | Path) -> Path:
+    """Fail early (before any work) if the output file cannot be created."""
+    path = Path(path)
+    folder = path.parent if str(path.parent) else Path(".")
+    if not folder.is_dir():
+        raise FileNotFoundError(f"{path}: output folder {folder} does not exist")
+    if path.is_dir():
+        raise IsADirectoryError(f"{path}: is a folder, not a file name")
+    if path.suffix.lower() != ".mp4":
+        raise ValueError(f"{path}: the output file must end with .mp4")
+    return path
 
 
 # --------------------------------------------------------------------- video

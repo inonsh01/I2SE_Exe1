@@ -1,0 +1,3 @@
+# a typo in the first plane must not be skipped as a header
+0,50,0, 0,50,129, 255,50,0, 255,50,129x
+0,60,0, 0,60,129, 255,60,0, 255,60,129

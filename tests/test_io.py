@@ -1,10 +1,10 @@
-"""Unit tests for file input/output: TC-IO1 ... TC-IO7 in docs/TESTING.md."""
+"""Unit tests for file input/output: TC-IO1 ... TC-IO11 in docs/TESTING.md."""
 from pathlib import Path
 
 import numpy as np
 import pytest
 
-from projection.io import intensity_window, load_volume, read_planes, to_uint8, write_video
+from projection.io import check_output_path, intensity_window, load_volume, read_planes, to_uint8, write_video
 
 DATA = Path(__file__).resolve().parents[1] / "data"
 
@@ -102,3 +102,47 @@ def test_to_uint8_and_window():
     assert img.dtype == np.uint8
     assert img.min() == 0 and img.max() > 200
     assert to_uint8(np.array([[lo - 100, hi + 100]]), lo, hi).tolist() == [[0, 255]]   # clipped
+
+
+# ----------------------------------------------------------------- TC-IO8..IO11
+def test_tc_io8_typo_in_first_line_is_an_error_not_a_header(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("3,0,0, 0,4,0, 6,4,0x\n3,0,0, 0,4,0, 6,4,0\n")
+    with pytest.raises(ValueError, match=r"line 1: not a number: 0x"):
+        read_planes(f)
+
+
+def test_tc_io9_header_after_comment_lines(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("# my planes\n\nax,ay,az,bx,by,bz,cx,cy,cz\n3,0,0, 0,4,0, 6,4,0\n")
+    assert len(read_planes(f)) == 1
+
+
+def test_tc_io9_only_one_header_allowed(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("ax,ay,az,bx,by,bz,cx,cy,cz\nax,ay,az,bx,by,bz,cx,cy,cz\n3,0,0, 0,4,0, 6,4,0\n")
+    with pytest.raises(ValueError, match="line 2"):
+        read_planes(f)
+
+
+@pytest.mark.parametrize("line", [
+    "3 0 0 0 4 0 6 4 0",            # spaces
+    "3;0;0;0;4;0;6;4;0",            # semicolons (European Excel)
+    "3\t0\t0\t0\t4\t0\t6\t4\t0",    # tabs
+    "\ufeff3,0,0,0,4,0,6,4,0",      # byte-order mark from Excel
+])
+def test_tc_io10_other_separators(tmp_path, line):
+    f = tmp_path / "p.csv"
+    f.write_text(line + "\n", encoding="utf-8")
+    assert len(read_planes(f)) == 1
+
+
+def test_tc_io11_output_path_checked(tmp_path):
+    assert check_output_path(tmp_path / "out.mp4") == tmp_path / "out.mp4"
+    with pytest.raises(FileNotFoundError, match="does not exist"):
+        check_output_path(tmp_path / "no_such_folder" / "out.mp4")
+    with pytest.raises(ValueError, match=".mp4"):
+        check_output_path(tmp_path / "out.avi")
+    (tmp_path / "x.mp4").mkdir()
+    with pytest.raises(IsADirectoryError):
+        check_output_path(tmp_path / "x.mp4")
