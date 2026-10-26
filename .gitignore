@@ -226,3 +226,6 @@ data/*.nrrd
 .venv/
 data/*.part
 results/cases/
+
+# macOS
+.DS_Store

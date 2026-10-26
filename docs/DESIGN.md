@@ -104,8 +104,20 @@ end to end.
 
 ### 4.1 `Plane` is an immutable value object with a factory method
 
-`Plane` is a frozen `dataclass`. The only way to build one from user input is
-`Plane.from_points(...)`, which validates first.
+`Plane` is a frozen `dataclass`. User input goes through the factory method
+`Plane.from_points(...)` (3 or 4 points, or 9 / 12 numbers). The validation
+itself runs in `__post_init__`, so calling `Plane(s1, s2, b, c)` directly is
+checked exactly the same way. How the "valid and unchangeable" promise is kept:
+
+| Risk | How it is prevented | Test |
+| --- | --- | --- |
+| Creating a plane without validation | Validation runs in `__post_init__`, for every way of creating one | TC-P14 |
+| Replacing a point (`plane.b = ...`) | `frozen=True`: raises `FrozenInstanceError` | TC-P14 |
+| Changing a point in place (`plane.b[0] = ...`) | The points are stored in **read-only** NumPy arrays | TC-P14 |
+| The caller changes its own array afterwards | The points are **copied** when the plane is created | TC-P14 |
+
+Being a value object, two planes with the same points are equal (`==`) and
+have the same `hash`, so planes can be compared and put in sets or dict keys.
 
 - **Why:** *"if you hold a `Plane`, it is valid."* No other code has to
   check it again, and it cannot be changed into an invalid one later.

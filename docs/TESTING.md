@@ -55,6 +55,7 @@ case (TC), see the traceability table in §7.
 | TC-P11 | Equal legs but not an isosceles trapezoid: legs cross, sides not parallel, parallelogram | Rejected, message names the rule |
 | TC-P12 | Legs or base longer than 4096 voxels | Rejected: "too large" |
 | TC-P13 | A coordinate beyond ±10⁶ | Rejected |
+| TC-P14 | A plane after it was created ([DESIGN.md](DESIGN.md) §4.1) | Cannot be changed (frozen, read-only points, caller's array copied); `Plane(...)` validates like `from_points`; equal points → `==` and same `hash` |
 
 ### 4.2 Projection (`projector.py`)
 
@@ -157,7 +158,7 @@ triangles) and check:
 | NFR-1 Performance | TC-F1, TC-F2 |
 | NFR-2 Axis-aligned = slice | TC-J1 |
 | NFR-3 Robustness | TC-J9, TC-D5–TC-D7, TC-D9–TC-D11 |
-| NFR-4 Separate modules | Code review, [DESIGN.md](DESIGN.md) |
+| NFR-4 Separate modules | Code review, [DESIGN.md](DESIGN.md), TC-P14 |
 | NFR-5 Every FR tested | This table |
 | NFR-6 Portability | Running the tests on macOS and Linux |
 
