@@ -1,5 +1,6 @@
-numpy>=1.24
-pynrrd>=1.0
+# Supported versions. requirements-lock.txt has the exact versions we tested with.
+numpy>=1.24,<3
+pynrrd>=1.0,<2
 pytest>=7
-imageio>=2.31
+imageio>=2.31,<3
 imageio-ffmpeg>=0.4.9

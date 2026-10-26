@@ -1,7 +1,12 @@
 # Software Requirements Specification (SRS)
 ## Plane Projection of a 3D Volume – I2SE Ex1
 
-Version 0.1
+Version 0.2
+
+| Version | Change |
+| --- | --- |
+| 0.1 | First version. |
+| 0.2 | FR-5: a 4-point plane must be a real isosceles trapezoid. FR-9: other separators, header rule. New FR-12 (plane size limit) and FR-13 (output path). NFR-2 states the first-row offset. |
 
 ---
 
@@ -73,9 +78,13 @@ python Ex0.py <file.nrrd> <file.csv> <file.mp4>
 
 ### 3.2 Plane file (CSV)
 - One plane per line.
+- Numbers are separated by commas, semicolons, spaces or tabs.
 - 9 numbers = 3 points: `ax,ay,az, bx,by,bz, cx,cy,cz`
 - 12 numbers = 4 points: `a1x,a1y,a1z, a2x,a2y,a2z, bx,by,bz, cx,cy,cz`
 - Empty lines and lines starting with `#` are ignored.
+- The first other line may be a header (only words, no numbers, e.g. `ax,ay,az,...`).
+  Any other line with text in it is an error, so a typo is never skipped silently.
+- Every coordinate must be between −10⁶ and 10⁶.
 
 Example:
 ```
@@ -99,13 +108,15 @@ Example:
 | **FR-2** | The system shall support voxel values of 8, 16 and 32 bits, unsigned (as in the assignment) and signed (as in real scans, see [data set](../data/README.md)). |
 | **FR-3** | The system shall reject a volume that is not 3D, or whose size is outside 1 ≤ s < 1024, with a clear error message. |
 | **FR-4** | The system shall accept a plane defined by 3 points (a, b, c) where \|dist(a,b) − dist(a,c)\| < EPS. |
-| **FR-5** | The system shall accept a plane defined by 4 points (a1, a2, b, c) where \|dist(a1,b) − dist(a2,c)\| < EPS, dist(a1,a2) ≤ dist(b,c), and all 4 points lie on the same plane. |
+| **FR-5** | The system shall accept a plane defined by 4 points (a1, a2, b, c) where \|dist(a1,b) − dist(a2,c)\| < EPS, dist(a1,a2) ≤ dist(b,c), and all 4 points lie on the same plane (the rules in the assignment). In addition, the shape must really be an isosceles trapezoid: a1–a2 parallel to b–c and pointing the same way (the legs do not cross), and symmetric (not a parallelogram). |
 | **FR-6** | The system shall reject an invalid plane (e.g. not isosceles, points on one line) with a message that says which rule failed and on which CSV line. |
 | **FR-7** | The system shall compute the 2D projection of the volume on a given plane, using the course algorithm. |
 | **FR-8** | Points of the plane that fall outside the volume shall get the value 0. |
 | **FR-9** | The system shall read a list of planes from a CSV file (format in §3.2). |
 | **FR-10** | The system shall save the projections of all planes as an MP4 video, one frame per plane, in CSV order. |
 | **FR-11** | The brightness scale shall be the same for all frames of one video, so the video does not flicker. |
+| **FR-12** | The system shall reject a plane whose legs or base are longer than 4096 voxels (more than twice the largest diagonal of any allowed volume), with a clear message, instead of running out of memory. |
+| **FR-13** | The system shall check, before doing any work, that the output file can be created (its folder exists, the name ends with `.mp4`), and shall report a failure while writing the video as an error, without leaving a broken file. |
 
 ---
 
@@ -114,8 +125,8 @@ Example:
 | ID | Category | Requirement |
 | --- | --- | --- |
 | **NFR-1** | Performance | For a 500³ volume, the system shall compute at least **30 projections per second** (required), with a target of **100+ per second**. |
-| **NFR-2** | Correctness | A plane aligned with the volume's axes shall give exactly the same values as the matching slice of the volume. |
-| **NFR-3** | Robustness | The system shall not crash on invalid input (missing file, bad CSV, plane outside the volume). It shall print an error and exit with a non-zero code. |
+| **NFR-2** | Correctness | A rectangle aligned with the volume's axes shall give exactly the same values as the matching slice of the volume, starting one row below the top edge a1–a2 (the course algorithm steps before it samples, see ALGORITHM.md §3 #4). |
+| **NFR-3** | Robustness | The system shall not crash on invalid input (missing file, bad CSV, plane outside the volume, huge plane, bad output path). It shall print a one-line error (never a Python traceback) and exit with a non-zero code. |
 | **NFR-4** | Maintainability | The code shall be split into separate modules: file input/output, plane definition, and projection. |
 | **NFR-5** | Testability | Every functional requirement shall be covered by at least one automated test. |
 | **NFR-6** | Portability | The system shall run on macOS, Linux and Windows with only free, open-source libraries. |

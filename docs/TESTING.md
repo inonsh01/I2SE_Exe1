@@ -51,6 +51,10 @@ case (TC), see the traceability table in §7.
 | TC-P7 | Trapezoid with top wider than base, `dist(a1,a2) > dist(b,c)` | Rejected |
 | TC-P8 | 4 points not on one plane | Rejected: "not on the same plane" |
 | TC-P9 | Wrong count of numbers (e.g. 7 or 10) | Rejected |
+| TC-P10 | Isosceles trapezoid that is not a rectangle | Accepted |
+| TC-P11 | Equal legs but not an isosceles trapezoid: legs cross, sides not parallel, parallelogram | Rejected, message names the rule |
+| TC-P12 | Legs or base longer than 4096 voxels | Rejected: "too large" |
+| TC-P13 | A coordinate beyond ±10⁶ | Rejected |
 
 ### 4.2 Projection (`projector.py`)
 
@@ -82,6 +86,10 @@ Each case uses a synthetic volume whose correct result we can compute by hand.
 | TC-IO5 | CSV with an invalid plane on line 3 | Rejected, the message says line 3 and the rule |
 | TC-IO6 | Empty CSV | Rejected: "no planes found" |
 | TC-IO7 | Video from frames of different sizes | MP4 is written; frame count equals the number of planes |
+| TC-IO8 | Typo in the **first** line (`6,4,0x`) | Rejected with "line 1", not skipped as a header |
+| TC-IO9 | Header after comment lines; two header lines | First is skipped; the second is an error |
+| TC-IO10 | Spaces, semicolons, tabs, Excel byte-order mark | Read correctly |
+| TC-IO11 | Output path: missing folder, not `.mp4`, a folder | Rejected before any work |
 
 ---
 
@@ -100,8 +108,11 @@ The demo is the part graders run, so it gets its own tests. Each one runs
 | TC-D6 | CSV has an invalid plane | Exit code ≠ 0, message names the line; no MP4 created |
 | TC-D7 | Wrong number of arguments | Exit code ≠ 0, usage message |
 | TC-D8 | Real scan `MRHead.nrrd` + `examples/axial_sweep.csv` | Video plays; we check it by eye (§6.2) |
+| TC-D9 | Output folder does not exist | Exit code ≠ 0, clear message, no traceback |
+| TC-D10 | A plane with legs of 100,000 voxels | Exit code ≠ 0, "line 1 … too large", no traceback, no MP4 |
+| TC-D11 | `--fps 0`, `--fps -5`, `--fps abc` | Exit code ≠ 0, message about `--fps` |
 
-TC-D1 to TC-D7 use the small synthetic files, so they run in under a second.
+TC-D1 to TC-D7 and TC-D9 to TC-D11 use the small synthetic files, so they run in under a second.
 
 ---
 
@@ -134,17 +145,19 @@ triangles) and check:
 | FR-2 8/16/32 bit, signed and unsigned | TC-J11, TC-IO1 |
 | FR-3 Reject non-3D / bad size | TC-IO2 |
 | FR-4 3-point plane | TC-P1, TC-P2, TC-P3 |
-| FR-5 4-point plane | TC-P6, TC-P7, TC-P8 |
-| FR-6 Clear error for invalid plane | TC-P3–TC-P9, TC-IO5, TC-D6 |
+| FR-5 4-point plane | TC-P6, TC-P7, TC-P8, TC-P10, TC-P11 |
+| FR-6 Clear error for invalid plane | TC-P3–TC-P13, TC-IO5, TC-D6 |
 | FR-7 Projection algorithm | TC-J1–TC-J8, TC-J12 |
 | FR-8 Outside → 0 | TC-J9, TC-J10 |
-| FR-9 Read CSV | TC-IO3–TC-IO6 |
+| FR-9 Read CSV | TC-IO3–TC-IO6, TC-IO8–TC-IO10 |
 | FR-10 MP4, one frame per plane, in order | TC-IO7, TC-D1, TC-D2, TC-D4 |
 | FR-11 Same brightness scale for all frames | TC-D8, §6.2 |
+| FR-12 Plane size limit | TC-P12, TC-P13, TC-D10 |
+| FR-13 Output path checked | TC-IO11, TC-D9 |
 | NFR-1 Performance | TC-F1, TC-F2 |
 | NFR-2 Axis-aligned = slice | TC-J1 |
-| NFR-3 Robustness | TC-J9, TC-D5, TC-D6, TC-D7 |
-| NFR-4 Separate modules | Code review |
+| NFR-3 Robustness | TC-J9, TC-D5–TC-D7, TC-D9–TC-D11 |
+| NFR-4 Separate modules | Code review, [DESIGN.md](DESIGN.md) |
 | NFR-5 Every FR tested | This table |
 | NFR-6 Portability | Running the tests on macOS and Linux |
 

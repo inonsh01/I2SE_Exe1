@@ -15,7 +15,7 @@ bash run_demo_cases.sh
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/rotating.csv results/cases/G1_rotating.mp4
 volume: (256, 256, 130) int16, planes: 90
-projected 90 planes in 0.028 s (3213 per second)
+projected 90 planes in 0.028 s (3173 per second)
 wrote results/cases/G1_rotating.mp4
 -> exit code 0
 
@@ -24,7 +24,7 @@ wrote results/cases/G1_rotating.mp4
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/axial_sweep.csv results/cases/G2_axial_sweep.mp4
 volume: (256, 256, 130) int16, planes: 120
-projected 120 planes in 0.039 s (3107 per second)
+projected 120 planes in 0.037 s (3209 per second)
 wrote results/cases/G2_axial_sweep.mp4
 -> exit code 0
 
@@ -33,7 +33,7 @@ wrote results/cases/G2_axial_sweep.mp4
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/triangles.csv results/cases/G3_triangles.mp4
 volume: (256, 256, 130) int16, planes: 40
-projected 40 planes in 0.013 s (3115 per second)
+projected 40 planes in 0.012 s (3227 per second)
 wrote results/cases/G3_triangles.mp4
 -> exit code 0
 
@@ -42,7 +42,7 @@ wrote results/cases/G3_triangles.mp4
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/edge/mixed_shapes.csv results/cases/G4_mixed.mp4 --png-dir results/cases/G4_png
 volume: (256, 256, 130) int16, planes: 2
-projected 2 planes in 0.001 s (1945 per second)
+projected 2 planes in 0.001 s (2019 per second)
 wrote results/cases/G4_mixed.mp4
 wrote 2 PNG files to results/cases/G4_png
 -> exit code 0
@@ -80,7 +80,7 @@ options:
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/edge/mixed_shapes.csv results/cases/E1_mixed.mp4
 volume: (256, 256, 130) int16, planes: 2
-projected 2 planes in 0.001 s (2027 per second)
+projected 2 planes in 0.001 s (2030 per second)
 wrote results/cases/E1_mixed.mp4
 -> exit code 0
 
@@ -89,7 +89,7 @@ wrote results/cases/E1_mixed.mp4
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/edge/partly_outside.csv results/cases/E2_partly_outside.mp4
 volume: (256, 256, 130) int16, planes: 1
-projected 1 planes in 0.001 s (1543 per second)
+projected 1 planes in 0.001 s (1588 per second)
 wrote results/cases/E2_partly_outside.mp4
 -> exit code 0
 
@@ -98,7 +98,7 @@ wrote results/cases/E2_partly_outside.mp4
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/edge/fully_outside.csv results/cases/E3_fully_outside.mp4
 volume: (256, 256, 130) int16, planes: 1
-projected 1 planes in 0.001 s (1548 per second)
+projected 1 planes in 0.001 s (1563 per second)
 wrote results/cases/E3_fully_outside.mp4
 -> exit code 0
 
@@ -143,7 +143,7 @@ error: examples/bad/wrong_count.csv, line 2: expected 9 or 12 numbers, got 7
   B6  a word instead of a number
 ==================================================================
 $ python Ex0.py data/MRHead.nrrd examples/bad/not_a_number.csv results/cases/B6.mp4
-error: examples/bad/not_a_number.csv, line 3: not a number in ['0', '128', 'abc', '255', '128', '0', '255', '128', '129']
+error: examples/bad/not_a_number.csv, line 3: not a number: abc
 -> exit code 2
 
 ==================================================================
@@ -180,6 +180,42 @@ error: README.md: not a valid NRRD file (Invalid NRRD magic line. Is this an NRR
 $ python Ex0.py data/MRHead.nrrd
 usage: Ex0.py [-h] [--fps FPS] [--png-dir PNG_DIR] nrrd csv mp4
 Ex0.py: error: the following arguments are required: csv, mp4
+-> exit code 2
+
+==================================================================
+  B12 plane far too large
+==================================================================
+$ python Ex0.py data/MRHead.nrrd examples/bad/too_large.csv results/cases/B12.mp4
+error: examples/bad/too_large.csv, line 2: plane too large: legs are 100000.0 voxels long (max 4096)
+-> exit code 2
+
+==================================================================
+  B13 typo in the first line
+==================================================================
+$ python Ex0.py data/MRHead.nrrd examples/bad/typo_first_line.csv results/cases/B13.mp4
+error: examples/bad/typo_first_line.csv, line 2: not a number: 129x
+-> exit code 2
+
+==================================================================
+  B14 legs cross (not a trapezoid)
+==================================================================
+$ python Ex0.py data/MRHead.nrrd examples/bad/legs_cross.csv results/cases/B14.mp4
+error: examples/bad/legs_cross.csv, line 2: the legs cross: a1 must be on the side of b, and a2 on the side of c
+-> exit code 2
+
+==================================================================
+  B15 output folder does not exist
+==================================================================
+$ python Ex0.py data/MRHead.nrrd examples/rotating.csv no_such_folder/out.mp4
+error: no_such_folder/out.mp4: output folder no_such_folder does not exist
+-> exit code 2
+
+==================================================================
+  B16 bad --fps
+==================================================================
+$ python Ex0.py data/MRHead.nrrd examples/rotating.csv results/cases/B16.mp4 --fps 0
+usage: Ex0.py [-h] [--fps FPS] [--png-dir PNG_DIR] nrrd csv mp4
+Ex0.py: error: argument --fps: must be a positive whole number, got 0
 -> exit code 2
 
 ######## videos that were created ########

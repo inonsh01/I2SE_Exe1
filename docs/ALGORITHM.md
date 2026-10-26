@@ -166,6 +166,13 @@ The legs are `a1→b` and `a2→c`, with `Dab = dist(a1,b) = dist(a2,c)`.
 If `dist(a1,a2) = dist(b,c)`, every row has the same length and the image is a
 full rectangle.
 
+The row formula `P = mid(y) + (x − Dbc/2)·dp` centres every row, so it only
+draws the shape correctly if the shape is symmetric around its middle line.
+That is why the plane check (FR-5) also requires `a1–a2 ∥ b–c`, the same
+direction (legs that do not cross), and symmetry. A parallelogram has equal
+legs and parallel sides too, but would come out as a distorted rectangle, so
+it is rejected.
+
 ---
 
 ## 7. Edge cases
@@ -183,4 +190,8 @@ full rectangle.
 
 - **Time:** `O(H · W)` per plane: one formula and one lookup per pixel.
 - **Memory:** `O(H · W)` for the image and temporary arrays. The volume is
-  not copied.
+  not copied per plane. It is copied **once**, when the `Projector` is created,
+  if it is not already in C order (pynrrd returns Fortran order), so that a
+  voxel's flat index is `x·sy·sz + y·sz + z`.
+- `H` and `W` are at most 4096 (FR-12), so one plane never needs more than a
+  few hundred MB of temporary memory.
