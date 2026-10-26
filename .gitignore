@@ -218,3 +218,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Real scans are downloaded by data/download_data.py (too big for git);
+# the small synthetic volumes are kept.
+data/*.nrrd
+!data/synthetic_*.nrrd

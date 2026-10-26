@@ -57,8 +57,8 @@ we found and how we close them:
 | # | Open question | Decision |
 | --- | --- | --- |
 | 1 | `p` has fractional coordinates (e.g. `(2.4, 0.8, 0)`). Which voxel do we read? | The **nearest voxel**: round each coordinate (`floor(v + 0.5)`). |
-| 2 | `x = Dbc/2 − d12/2 + x1` is fractional. Which column gets the value? | Avoided by design: see §4. |
-| 3 | Rounding `x` can send two samples to the same pixel and leave a neighbour empty (holes). | Avoided by design: see §4. Every pixel gets exactly one value. |
+| 2 | `x = Dbc/2 − d12/2 + x1` is fractional (e.g. 2.4). Which column gets the value? | Avoided by design: we go over whole columns (pixels) instead, see §4. |
+| 3 | Because of that fraction, rounding can shift a row up to half a pixel to one side, so rows are not exactly centred. | A pixel is filled exactly when its centre lies inside the triangle, so every row is symmetric around the image centre. |
 | 4 | Is the apex `a` itself sampled? | No. The algorithm steps first, so row `y` is at distance `y + 1` from `a`. |
 | 5 | `E[x][y]` or `E[y][x]`? | We store `E[y][x]` (row, column), the usual convention for images. |
 | 6 | Image size when `Dab`, `Dbc` are not integers. | `H = ceil(Dab)`, `W = floor(Dbc) + 1` (see §1). |
@@ -119,7 +119,7 @@ for each row y = 0 … H−1:
 ```
 
 ### 4.3 Why this is better
-1. **No holes and no overwrites:** each pixel is computed exactly once.
+1. **Well-defined and symmetric:** each pixel is computed exactly once, and a pixel is filled exactly when its centre is inside the triangle. No fractional columns to round.
 2. **Fast:** the inner computation is the same formula for every pixel, so all
    pixels can be computed **at once** with array operations (NumPy) instead of
    a Python loop per pixel. This is what makes NFR-1 (30+ FPS) reachable in Python.

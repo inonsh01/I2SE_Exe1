@@ -22,7 +22,7 @@ video, one frame per plane.
 | Term | Meaning |
 | --- | --- |
 | Volume (M) | A 3D matrix of size sx × sy × sz, where 1 ≤ sx, sy, sz < 1024. |
-| Voxel | One cell of the volume, M[x][y][z]. Holds an unsigned integer of 8, 16 or 32 bits. |
+| Voxel | One cell of the volume, M[x][y][z]. Holds an integer of 8, 16 or 32 bits. |
 | Plane (p) | A cut through the volume, given by 3 points (triangle) or 4 points (trapezoid). |
 | Projection | The 2D image of the volume's values on the plane. |
 | EPS | Tolerance for comparing lengths: 0.001. |
@@ -96,7 +96,7 @@ Example:
 | ID | Requirement |
 | --- | --- |
 | **FR-1** | The system shall load a 3D volume from an NRRD file. |
-| **FR-2** | The system shall support voxel values of 8, 16 and 32 bits. |
+| **FR-2** | The system shall support voxel values of 8, 16 and 32 bits, unsigned (as in the assignment) and signed (as in real scans, see [data set](../data/README.md)). |
 | **FR-3** | The system shall reject a volume that is not 3D, or whose size is outside 1 ≤ s < 1024, with a clear error message. |
 | **FR-4** | The system shall accept a plane defined by 3 points (a, b, c) where \|dist(a,b) − dist(a,c)\| < EPS. |
 | **FR-5** | The system shall accept a plane defined by 4 points (a1, a2, b, c) where \|dist(a1,b) − dist(a2,c)\| < EPS, dist(a1,a2) ≤ dist(b,c), and all 4 points lie on the same plane. |
