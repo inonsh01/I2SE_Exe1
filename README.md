@@ -61,7 +61,7 @@ The full-quality videos are in [`results/`](results/). Results for all four scan
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate   # once
-pip install -r requirements.txt                       # once
+pip install -r requirements.txt                       # once (requirements-lock.txt = exact tested versions)
 python data/download_data.py MRHead                   # get a real scan
 
 python Ex0.py data/MRHead.nrrd examples/rotating.csv out.mp4   # the demo
@@ -82,13 +82,14 @@ tests/        automated tests (pytest), named after the test cases in docs/TESTI
 benchmarks/   speed test
 examples/     plane lists (CSV)
 data/         data set: download script + synthetic volumes
-docs/         SRS, algorithm, testing strategy
+docs/         SRS, design, algorithm, testing strategy, experiment
 results/      demo output videos
 ```
 
 ## Documents
 
 - [Software Requirements Specification (SRS)](docs/SRS.md)
+- [Software design (classes, responsibilities, decisions)](docs/DESIGN.md)
 - [Algorithm](docs/ALGORITHM.md)
 - [Data set](data/README.md)
 - [Testing strategy](docs/TESTING.md)
