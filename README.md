@@ -39,3 +39,4 @@ saves them as a video (MP4).
 - [Software Requirements Specification (SRS)](docs/SRS.md)
 - [Algorithm](docs/ALGORITHM.md)
 - [Data set](data/README.md)
+- [Testing strategy](docs/TESTING.md)
