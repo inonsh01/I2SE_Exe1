@@ -37,3 +37,4 @@ saves them as a video (MP4).
 
 ## Documents
 - [Software Requirements Specification (SRS)](docs/SRS.md)
+- [Algorithm](docs/ALGORITHM.md)
