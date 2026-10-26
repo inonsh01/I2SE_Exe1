@@ -34,3 +34,6 @@ saves them as a video (MP4).
 - A graphical user interface (GUI).
 - File formats other than NRRD (e.g. DICOM).
 - Physical/world coordinates: plane points are given in voxel indices.
+
+## Documents
+- [Software Requirements Specification (SRS)](docs/SRS.md)
