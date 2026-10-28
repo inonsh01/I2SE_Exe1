@@ -1,6 +1,6 @@
 """Projection of a 3D volume onto a plane (SRS FR-7, FR-8; docs/ALGORITHM.md).
 
-We use the "pull" form of the course algorithm (ALGORITHM.md §4): for every
+We use the "pull" form of the course algorithm (ALGORITHM.md section 4): for every
 output pixel (x, y) we compute the 3D point it comes from,
 
     P(x, y) = mid(y) + (x - Dbc/2) * dp(y)
@@ -37,7 +37,7 @@ class Projector:
 
     @staticmethod
     def output_shape(plane: Plane) -> tuple[int, int]:
-        """(H, W) of the image: H = ceil(Dab), W = floor(Dbc) + 1  (ALGORITHM.md §1)."""
+        """(H, W) of the image: H = ceil(Dab), W = floor(Dbc) + 1  (ALGORITHM.md section 1)."""
         H = int(np.ceil(plane.leg_length - _TOL))
         W = int(np.floor(plane.base_length + _TOL)) + 1
         return H, W
@@ -74,7 +74,7 @@ def _row_geometry(plane: Plane, H: int, W: int):
     dab, dbc = plane.leg_length, plane.base_length
     u1 = (plane.b - plane.s1) / dab                     # v(ab): one step down the left leg
     u2 = (plane.c - plane.s2) / dab                     # v(ac): one step down the right leg
-    t = np.arange(1, H + 1, dtype=np.float64)[:, None]  # row y is at step y+1 (ALGORITHM.md §3 #4)
+    t = np.arange(1, H + 1, dtype=np.float64)[:, None]  # row y is at step y+1 (ALGORITHM.md section 3, #4)
     a1 = plane.s1 + t * u1                              # H x 3
     a2 = plane.s2 + t * u2
     seg = a2 - a1

@@ -24,9 +24,9 @@ How to repeat everything:
 
 ```bash
 python data/download_data.py              # the 4 real scans
-python experiments/run_experiment.py      # §2 and §3: videos, sample frames, speed table
-python benchmarks/bench.py                # §2: the 500^3 speed test (TC-F1)
-bash run_demo_cases.sh                    # §4: good, edge and bad demo runs
+python experiments/run_experiment.py      # sections 2 and 3: videos, sample frames, speed table
+python benchmarks/bench.py                # section 2: the 500^3 speed test (TC-F1)
+bash run_demo_cases.sh                    # section 4: good, edge and bad demo runs
 python -m pytest                          # all automated tests
 ```
 
@@ -91,14 +91,14 @@ of each video: the start, a quarter of the turn and half of the turn.
    | MRBrainTumor1 | 0.94 × 0.94 × 1.4 | 1.5 |
    | CTChest | 0.76 × 0.76 × 2.5 | **3.3** |
 
-   CTChest is the clearest example. Supporting millimetre coordinates would fix it (§6).
+   CTChest is the clearest example. Supporting millimetre coordinates would fix it ([section 6](#6-limitations-and-future-work)).
 
 2. **Low contrast on CT (a real weakness).** The brightness window is taken
    automatically from the 0.5–99.5 percentiles of the whole volume (FR-11). On
    MRI this works well. On CT the values range from air (−1000) to bone
    (+1000 and more), so soft tissue ends up in a narrow band of greys.
    Radiologists use fixed "windows" for CT, for example lungs or soft tissue.
-   A `--window LOW,HIGH` option would fix this (§6).
+   A `--window LOW,HIGH` option would fix this ([section 6](#6-limitations-and-future-work)).
 
 3. **Grey border in CTChest.** The scanner fills the area outside its round
    field of view with a constant value. That area is part of the file, so it
@@ -127,7 +127,7 @@ of each video: the start, a quarter of the turn and half of the turn.
 | --- | --- | --- |
 | E1 | A triangle and a rectangle in one CSV | 2 frames of different shapes, centred in the video |
 | E2 | Rectangle half outside the scan | The outside half is black |
-| E3 | Rectangle completely outside the scan | One all-black frame. No warning is printed (§6) |
+| E3 | Rectangle completely outside the scan | One all-black frame. No warning is printed ([section 6](#6-limitations-and-future-work)) |
 
 **Bad input: exit code 2, error message, no video created**
 
@@ -169,7 +169,7 @@ it writes anything.
 
 | Limitation | Seen in | Possible fix |
 | --- | --- | --- |
-| Images squeezed when voxels are not cubes | §3 finding 1 (CTChest: 3.3×) | Use the voxel spacing from the NRRD header (millimetre coordinates) |
-| Low contrast on CT | §3 finding 2 | `--window LOW,HIGH` option with presets (lungs, soft tissue, bone) |
-| Plane completely outside the scan gives a black frame, silently | §4 E3 | Print a warning with the CSV line number |
+| Images squeezed when voxels are not cubes | [Section 3](#3-what-the-videos-show), finding 1 (CTChest: 3.3×) | Use the voxel spacing from the NRRD header (millimetre coordinates) |
+| Low contrast on CT | [Section 3](#3-what-the-videos-show), finding 2 | `--window LOW,HIGH` option with presets (lungs, soft tissue, bone) |
+| Plane completely outside the scan gives a black frame, silently | [Section 4](#4-demo-runs-good-edge-and-bad-tc-d-fr-6-nfr-3), E3 | Print a warning with the CSV line number |
 | Nearest-voxel sampling looks blocky when zoomed | close-up of frames | Trilinear interpolation (slower) |

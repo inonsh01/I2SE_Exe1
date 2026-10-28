@@ -109,7 +109,7 @@ Example:
 | **FR-6** | The system shall reject an invalid plane (e.g. not isosceles, points on one line) with a message that says which rule failed and on which CSV line. |
 | **FR-7** | The system shall compute the 2D projection of the volume on a given plane, using the [course algorithm](#6-the-required-algorithm-from-the-assignment). |
 | **FR-8** | Points of the plane that fall outside the volume shall get the value 0. |
-| **FR-9** | The system shall read a list of planes from a CSV file (format in §3.2). |
+| **FR-9** | The system shall read a list of planes from a CSV file (format in [section 3.2](#32-plane-file-csv)). |
 | **FR-10** | The system shall save the projections of all planes as an MP4 video, one frame per plane, in CSV order. |
 | **FR-11** | The brightness scale shall be the same for all frames of one video, so the video does not flicker. |
 | **FR-12** | The system shall reject a plane whose legs or base are longer than 4096 voxels (more than twice the largest diagonal of any allowed volume), with a clear message, instead of running out of memory. |
@@ -122,7 +122,7 @@ Example:
 | ID | Category | Requirement |
 | --- | --- | --- |
 | **NFR-1** | Performance | For a 500³ volume, the system shall compute at least **30 projections per second** (required), with a target of **100+ per second**. |
-| **NFR-2** | Correctness | A rectangle aligned with the volume's axes shall give exactly the same values as the matching slice of the volume, starting one row below the top edge a1–a2 (the course algorithm steps before it samples, see ALGORITHM.md §3 #4). |
+| **NFR-2** | Correctness | A rectangle aligned with the volume's axes shall give exactly the same values as the matching slice of the volume, starting one row below the top edge a1–a2 (the course algorithm steps before it samples, see [ALGORITHM.md, section 3, #4](ALGORITHM.md#3-what-the-course-algorithm-leaves-open-and-our-decisions)). |
 | **NFR-3** | Robustness | The system shall not crash on invalid input (missing file, bad CSV, plane outside the volume, huge plane, bad output path). It shall print a one-line error (never a Python traceback) and exit with a non-zero code. |
 | **NFR-4** | Maintainability | The code shall be split into separate modules: file input/output, plane definition, and projection. |
 | **NFR-5** | Testability | Every functional requirement shall be covered by at least one automated test. |

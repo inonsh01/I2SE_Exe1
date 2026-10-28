@@ -10,7 +10,7 @@ It covers requirement **FR-7** of the [SRS](SRS.md).
 **Input**
 - A volume `M` of size `sx × sy × sz`.
 - A plane, given as an isosceles triangle `(a, b, c)` with `dist(a,b) = dist(a,c)`.
-  (The 4-point trapezoid is handled in §6.)
+  (The 4-point trapezoid is handled in [section 6](#6-trapezoid-4-points).)
 
 **Output**
 - A 2D image `E` with `H` rows and `W` columns:
@@ -57,11 +57,11 @@ we found and how we close them:
 | # | Open question | Decision |
 | --- | --- | --- |
 | 1 | `p` has fractional coordinates (e.g. `(2.4, 0.8, 0)`). Which voxel do we read? | The **nearest voxel**: round each coordinate (`floor(v + 0.5)`). |
-| 2 | `x = Dbc/2 − d12/2 + x1` is fractional (e.g. 2.4). Which column gets the value? | Avoided by design: we go over whole columns (pixels) instead, see §4. |
+| 2 | `x = Dbc/2 − d12/2 + x1` is fractional (e.g. 2.4). Which column gets the value? | Avoided by design: we go over whole columns (pixels) instead, see [section 4](#4-our-formulation-pull-instead-of-push). |
 | 3 | Because of that fraction, rounding can shift a row up to half a pixel to one side, so rows are not exactly centred. | A pixel is filled exactly when its centre lies inside the triangle, so every row is symmetric around the image centre. |
 | 4 | Is the apex `a` itself sampled? | No. The algorithm steps first, so row `y` is at distance `y + 1` from `a`. |
 | 5 | `E[x][y]` or `E[y][x]`? | We store `E[y][x]` (row, column), the usual convention for images. |
-| 6 | Image size when `Dab`, `Dbc` are not integers. | `H = ceil(Dab)`, `W = floor(Dbc) + 1` (see §1). |
+| 6 | Image size when `Dab`, `Dbc` are not integers. | `H = ceil(Dab)`, `W = floor(Dbc) + 1` (see [section 1](#1-input-and-output)). |
 | 7 | Pixels outside the triangle. | Value 0 (black). |
 | 8 | Points outside the volume. | Value 0 (black), as the assignment says. |
 

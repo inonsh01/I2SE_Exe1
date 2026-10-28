@@ -5,7 +5,7 @@ or by 4 points (a1, a2, b, c) forming an isosceles trapezoid.
 
 Both forms are stored the same way: two "legs" s1 -> b and s2 -> c of equal
 length. For a triangle s1 == s2 == a. This lets the projection code handle
-both shapes with one algorithm (see docs/ALGORITHM.md §6).
+both shapes with one algorithm (see docs/ALGORITHM.md section 6).
 """
 from __future__ import annotations
 

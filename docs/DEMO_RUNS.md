@@ -1,6 +1,6 @@
 # Demo Runs: Good, Edge and Bad Cases
 
-Full output of `bash run_demo_cases.sh` (see [EXPERIMENT.md](EXPERIMENT.md) §4 for the summary).
+Full output of `bash run_demo_cases.sh` (see [EXPERIMENT.md, section 4](EXPERIMENT.md#4-demo-runs-good-edge-and-bad-tc-d-fr-6-nfr-3) for the summary).
 Run it yourself from the project folder, with the virtual environment active:
 
 ```

@@ -132,7 +132,7 @@ Both shapes are stored as two legs `s1→b` and `s2→c`; for a triangle
 
 - **Why:** the projection code has **one** path for both shapes, with no
   `if triangle … else …`. Fewer branches → fewer bugs, and one set of tests
-  covers both (ALGORITHM.md §6).
+  covers both ([ALGORITHM.md, section 6](ALGORITHM.md#6-trapezoid-4-points)).
 - **Alternative rejected:** two subclasses `Triangle(Plane)` and
   `Trapezoid(Plane)`, each with its own `project()`. It looks more "OO", but
   the two would contain the same algorithm twice. Polymorphism is useful when
@@ -188,11 +188,11 @@ the real values.
 
 ## 5. How the design can be extended
 
-| Future change ([EXPERIMENT.md](EXPERIMENT.md) §6) | Where it goes | What else changes |
+| Future change ([EXPERIMENT.md, section 6](EXPERIMENT.md#6-limitations-and-future-work)) | Where it goes | What else changes |
 | --- | --- | --- |
 | Trilinear interpolation instead of nearest voxel | A new sampling step inside `Projector` (e.g. a `sampling="nearest" \| "linear"` argument) | Nothing outside `projector.py` |
 | Millimetre coordinates (voxel spacing) | `io.load_volume` also returns the spacing; points are converted to voxel units before `Plane.from_points` | `Plane` and `Projector` unchanged |
 | CT windows (`--window LOW,HIGH`) | `Ex0.py` argument → `to_uint8(lo, hi)` | Nothing in the core |
 | Other input formats (DICOM) | A new `load_…` function in `io.py` that returns the same array | Nothing else |
 
-Each change touches one module, which is the main goal of the split in §3.
+Each change touches one module, which is the main goal of the split in [section 3](#3-responsibilities).

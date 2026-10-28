@@ -36,7 +36,7 @@ def test_tc_j2_worked_example_from_algorithm_doc():
     expected = np.zeros((5, 7), dtype=np.uint8)
     expected[0, 3] = cell(3, 1)                              # row 0: column 3 only
     expected[1, 2:5] = [cell(2, 2), cell(3, 2), cell(4, 2)]  # row 1
-    expected[2, 2:5] = [cell(2, 2), cell(3, 2), cell(4, 2)]  # row 2 (same voxels, see §5)
+    expected[2, 2:5] = [cell(2, 2), cell(3, 2), cell(4, 2)]  # row 2 (same voxels, see ALGORITHM.md section 5)
     expected[3, 1:6] = [cell(i, 3) for i in range(1, 6)]     # row 3
     expected[4, :] = [cell(i, 4) for i in range(7)]          # row 4: the whole base
     np.testing.assert_array_equal(img, expected)

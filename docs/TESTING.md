@@ -2,7 +2,7 @@
 
 This document defines how we check that the program meets the
 [SRS](SRS.md). Every requirement (FR / NFR) is covered by at least one test
-case (TC), see the traceability table in §7.
+case (TC), see the traceability table in [section 7](#7-traceability-requirement--tests).
 
 ---
 
@@ -55,7 +55,7 @@ case (TC), see the traceability table in §7.
 | TC-P11 | Equal legs but not an isosceles trapezoid: legs cross, sides not parallel, parallelogram | Rejected, message names the rule |
 | TC-P12 | Legs or base longer than 4096 voxels | Rejected: "too large" |
 | TC-P13 | A coordinate beyond ±10⁶ | Rejected |
-| TC-P14 | A plane after it was created ([DESIGN.md](DESIGN.md) §4.1) | Cannot be changed (frozen, read-only points, caller's array copied); `Plane(...)` validates like `from_points`; equal points → `==` and same `hash` |
+| TC-P14 | A plane after it was created ([DESIGN.md, section 4.1](DESIGN.md#41-plane-is-an-immutable-value-object-with-a-factory-method)) | Cannot be changed (frozen, read-only points, caller's array copied); `Plane(...)` validates like `from_points`; equal points → `==` and same `hash` |
 
 ### 4.2 Projection (`projector.py`)
 
@@ -64,7 +64,7 @@ Each case uses a synthetic volume whose correct result we can compute by hand.
 | ID | Volume | Plane | Expected |
 | --- | --- | --- | --- |
 | TC-J1 | Random 20×15×12 | Rectangle at `y = 7`, along x and z | Image equals the slice `M[1:, 7, :]` exactly (row `r` is at step `r+1`) |
-| TC-J2 | Hand-made 7×5×1 | The triangle from ALGORITHM.md §5 | Exactly the 5×7 image in the worked example |
+| TC-J2 | Hand-made 7×5×1 | The triangle from [ALGORITHM.md, section 5](ALGORITHM.md#5-worked-example) | Exactly the 5×7 image in the worked example |
 | TC-J3 | Constant volume | Any triangle | Filled pixels form a triangle: row widths never shrink, top corners are 0, bottom row is full |
 | TC-J4 | Constant volume | Every pixel | A pixel is non-zero **iff** `\|x − Dbc/2\| ≤ d12/2` |
 | TC-J5 | `synthetic_gradient` (value = 1000·x) | Plane at constant `x = 20` | Every pixel inside the triangle is 20000 |
@@ -109,7 +109,7 @@ The demo is the part graders run, so it gets its own tests. Each one runs
 | TC-D5 | NRRD file does not exist | Exit code ≠ 0, message "file not found"; no MP4 created |
 | TC-D6 | CSV has an invalid plane | Exit code ≠ 0, message names the line; no MP4 created |
 | TC-D7 | Wrong number of arguments | Exit code ≠ 0, usage message |
-| TC-D8 | Real scan `MRHead.nrrd` + `examples/axial_sweep.csv` | Video plays; we check it by eye (§6.2) |
+| TC-D8 | Real scan `MRHead.nrrd` + `examples/axial_sweep.csv` | Video plays; we check it by eye ([section 6.2](#62-visual-check-manual)) |
 | TC-D9 | Output folder does not exist | Exit code ≠ 0, clear message, no traceback |
 | TC-D10 | A plane with legs of 100,000 voxels | Exit code ≠ 0, "line 1 … too large", no traceback, no MP4 |
 | TC-D11 | `--fps 0`, `--fps -5`, `--fps abc` | Exit code ≠ 0, message about `--fps` |
@@ -153,7 +153,7 @@ triangles) and check:
 | FR-8 Outside → 0 | TC-J9, TC-J10 |
 | FR-9 Read CSV | TC-IO3–TC-IO6, TC-IO8–TC-IO10, TC-IO12 |
 | FR-10 MP4, one frame per plane, in order | TC-IO7, TC-D1, TC-D2, TC-D4 |
-| FR-11 Same brightness scale for all frames | TC-D8, §6.2 |
+| FR-11 Same brightness scale for all frames | TC-D8, [section 6.2](#62-visual-check-manual) |
 | FR-12 Plane size limit | TC-P12, TC-P13, TC-D10 |
 | FR-13 Output path checked | TC-IO11, TC-D9 |
 | NFR-1 Performance | TC-F1, TC-F2 |

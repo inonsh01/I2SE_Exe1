@@ -111,7 +111,7 @@ def test_tc_p13_coordinates_too_far_rejected():
         Plane.from_points([[1e9, 0, 0], [1e9 - 3, 4, 0], [1e9 + 3, 4, 0]])
 
 
-# ----------------------------------------------------------------- TC-P14 (DESIGN.md §4.1)
+# ----------------------------------------------------------------- TC-P14 (DESIGN.md section 4.1)
 def test_tc_p14_plane_cannot_be_changed():
     p = Plane.from_points(TRIANGLE)
     with pytest.raises(dataclasses.FrozenInstanceError):
