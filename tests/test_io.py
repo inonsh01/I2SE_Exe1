@@ -1,4 +1,4 @@
-"""Unit tests for file input/output: TC-IO1 ... TC-IO11 in docs/TESTING.md."""
+"""Unit tests for file input/output: TC-IO1 ... TC-IO12 in docs/TESTING.md."""
 from pathlib import Path
 
 import numpy as np
@@ -146,3 +146,27 @@ def test_tc_io11_output_path_checked(tmp_path):
     (tmp_path / "x.mp4").mkdir()
     with pytest.raises(IsADirectoryError):
         check_output_path(tmp_path / "x.mp4")
+
+
+# ----------------------------------------------------------------- TC-IO12
+def test_tc_io12_leading_point_count(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("Number of Points (3 or 4),x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4\n"
+                 "3,3,0,0,0,4,0,6,4,0,,,\n"
+                 "4,0,0,0,0,0,9,9,0,0,9,0,9\n"
+                 "3,0,0,0, 0,0,9, 9,0,0, 9,0,9\n")          # 13 numbers led by 3: wrong
+    with pytest.raises(ValueError, match=r"line 4: the line says 3 points but has 12"):
+        read_planes(f)
+    f.write_text("Number of Points (3 or 4),x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4\n"
+                 "3,3,0,0,0,4,0,6,4,0,,,\n"
+                 "4,0,0,0,0,0,9,9,0,0,9,0,9\n")
+    with_count = read_planes(f)
+    f.write_text("3,0,0,0,4,0,6,4,0\n0,0,0,0,0,9,9,0,0,9,0,9\n")
+    assert with_count == read_planes(f)                        # same planes as without the count
+
+
+def test_tc_io12_bad_count_rejected(tmp_path):
+    f = tmp_path / "p.csv"
+    f.write_text("5,3,0,0,0,4,0,6,4,0\n")
+    with pytest.raises(ValueError, match=r"line 1: .*number of points \(3 or 4\), but it is 5"):
+        read_planes(f)

@@ -41,10 +41,27 @@ def _to_number(cell: str) -> float | None:
         return None
 
 
+def _drop_point_count(numbers: list[float]) -> list[float]:
+    """10 or 13 numbers = a leading point count (3 or 4) + the coordinates."""
+    if len(numbers) not in (10, 13):
+        return numbers                        # 9 or 12: no count; anything else: Plane reports it
+    count, coords = numbers[0], numbers[1:]
+    if count not in (3, 4):
+        raise PlaneError(f"got {len(numbers)} numbers, so the first should be the number "
+                         f"of points (3 or 4), but it is {count:g}")
+    if len(coords) != 3 * count:
+        raise PlaneError(f"the line says {count:g} points but has {len(coords)} coordinates "
+                         f"(expected {3 * int(count)})")
+    return coords
+
+
 def read_planes(path: str | Path) -> list[Plane]:
     """Read planes from a CSV file: one plane per line, 9 or 12 numbers.
 
-    Numbers may be separated by commas, semicolons or spaces. Blank lines and
+    A line may also start with the number of points (3 or 4), as in
+    "3,ax,ay,az,bx,by,bz,cx,cy,cz" (10 numbers) or "4,..." (13 numbers);
+    the count must match the coordinates that follow. Empty cells at the
+    end of a line (",,,") are ignored. Numbers may be separated by commas, semicolons or spaces. Blank lines and
     lines starting with '#' are skipped. The first non-comment line is
     skipped as a header only if it contains no numbers at all (for example
     "ax,ay,az,..."). A line that mixes numbers and text is always an error,
@@ -71,7 +88,7 @@ def read_planes(path: str | Path) -> list[Plane]:
                 raise ValueError(f"{path}, line {line_no}: not a number: {', '.join(bad)}")
             header_allowed = False
             try:
-                planes.append(Plane.from_points(numbers))
+                planes.append(Plane.from_points(_drop_point_count(numbers)))
             except PlaneError as e:
                 raise ValueError(f"{path}, line {line_no}: {e}") from None
     if not planes:

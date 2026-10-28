@@ -91,6 +91,7 @@ Each case uses a synthetic volume whose correct result we can compute by hand.
 | TC-IO9 | Header after comment lines; two header lines | First is skipped; the second is an error |
 | TC-IO10 | Spaces, semicolons, tabs, Excel byte-order mark | Read correctly |
 | TC-IO11 | Output path: missing folder, not `.mp4`, a folder | Rejected before any work |
+| TC-IO12 | Lines led by the point count (`3,…` / `4,…`), header `Number of Points (3 or 4),x1,…`, empty cells at the end | Same planes as without the count; a wrong count (`4` with 9 coordinates, `5,…`) is rejected with the line number |
 
 ---
 
@@ -150,7 +151,7 @@ triangles) and check:
 | FR-6 Clear error for invalid plane | TC-P3–TC-P13, TC-IO5, TC-D6 |
 | FR-7 Projection algorithm | TC-J1–TC-J8, TC-J12 |
 | FR-8 Outside → 0 | TC-J9, TC-J10 |
-| FR-9 Read CSV | TC-IO3–TC-IO6, TC-IO8–TC-IO10 |
+| FR-9 Read CSV | TC-IO3–TC-IO6, TC-IO8–TC-IO10, TC-IO12 |
 | FR-10 MP4, one frame per plane, in order | TC-IO7, TC-D1, TC-D2, TC-D4 |
 | FR-11 Same brightness scale for all frames | TC-D8, §6.2 |
 | FR-12 Plane size limit | TC-P12, TC-P13, TC-D10 |

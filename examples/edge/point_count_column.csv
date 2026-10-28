@@ -1,0 +1,4 @@
+Number of Points (3 or 4),x1,y1,z1,x2,y2,z2,x3,y3,z3,x4,y4,z4
+# Each line starts with its number of points (3 or 4). A triangle and a rectangle through MRHead.
+3,0,128,64.5,255,128,0,255,128,129,,,
+4,0,50,0,0,50,129,255,50,0,255,50,129

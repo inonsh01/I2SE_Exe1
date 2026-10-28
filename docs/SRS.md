@@ -1,11 +1,12 @@
 # Software Requirements Specification (SRS)
 ## Plane Projection of a 3D Volume – I2SE Ex1
 
-Version 0.2
+Version 0.3
 
 | Version | Change |
 | --- | --- |
 | 0.1 | First version. |
+| 0.3 | FR-9: optional leading point count (3 or 4), the format some classmates' CSV files use. |
 | 0.2 | FR-5: a 4-point plane must be a real isosceles trapezoid. FR-9: other separators, header rule. New FR-12 (plane size limit) and FR-13 (output path). NFR-2 states the first-row offset. |
 
 ---
@@ -81,6 +82,9 @@ python Ex0.py <file.nrrd> <file.csv> <file.mp4>
 - Numbers are separated by commas, semicolons, spaces or tabs.
 - 9 numbers = 3 points: `ax,ay,az, bx,by,bz, cx,cy,cz`
 - 12 numbers = 4 points: `a1x,a1y,a1z, a2x,a2y,a2z, bx,by,bz, cx,cy,cz`
+- A line may also start with the number of points: `3,ax,…,cz` (10 numbers) or
+  `4,a1x,…,cz` (13 numbers). The count must match the coordinates. Empty cells at
+  the end of a line (`,,,`) are ignored. The point order is the same: a1, a2, b, c.
 - Empty lines and lines starting with `#` are ignored.
 - The first other line may be a header (only words, no numbers, e.g. `ax,ay,az,...`).
   Any other line with text in it is an error, so a typo is never skipped silently.

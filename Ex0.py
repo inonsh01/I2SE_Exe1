@@ -4,7 +4,8 @@ Usage:
     python Ex0.py <file.nrrd> <file.csv> <file.mp4> [--fps 10] [--png-dir DIR]
 
     file.nrrd  the 3D volume
-    file.csv   one plane per line: 9 numbers (a, b, c) or 12 (a1, a2, b, c)
+    file.csv   one plane per line: 9 numbers (a, b, c) or 12 (a1, a2, b, c),
+               optionally led by the number of points: 3,... or 4,...
     file.mp4   the output video, one frame per plane, in CSV order
 """
 from __future__ import annotations
